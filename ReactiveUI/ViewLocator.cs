@@ -72,7 +72,17 @@ namespace ReactiveUI
 
             // IViewFor<FooBarViewModel> (the original behavior in RxUI 3.1)
             var viewType = typeof (IViewFor<>);
-            return attemptToResolveView(viewType.MakeGenericType(viewModelType), contract);
+
+            while (ret == null && viewModelType != null)
+            {
+                ret = attemptToResolveView(viewType.MakeGenericType(viewModelType), contract);
+                if (ret != null) return ret;
+
+                // try next base type
+                viewModelType = viewModelType.GetTypeInfo().BaseType;
+            }
+
+            return null;
         }
 
         IViewFor attemptToResolveView(Type type, string contract)
